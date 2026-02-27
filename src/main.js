@@ -126,28 +126,36 @@ runBtn.addEventListener("click", async () => {
   
   const codigoPortugol = view.state.doc.toString();
   term.write('\r\n\x1b[1;34m[COMPILANDO]\x1b[0m\r\n');
-  
   try {
     pyodide.globals.set("codigo_portugol", codigoPortugol);
-    
-    // ATENÇÃO: Mudamos para meuPia (com P maiúsculo)
     await pyodide.runPythonAsync(`
-import os
-from meuPia.compiler import main 
-
-os.makedirs("output", exist_ok=True)
-
-with open("main.por", "w", encoding="utf-8") as f:
-    f.write(codigo_portugol)
-
-main("main.por", "output")
-
-with open("output/main.py", "r", encoding="utf-8") as f:
-    codigo_python_gerado = f.read()
-
-print("\\033[1;32m[EXECUTANDO]\\033[0m")
-exec(codigo_python_gerado, globals())
-    `);
+      import os
+      import sys
+      import io
+      from meuPia.compiler import main 
+      
+      os.makedirs("output", exist_ok=True)
+      
+      with open("main.por", "w", encoding="utf-8") as f:
+          f.write(codigo_portugol)
+      
+      # --- INÍCIO DO MODO SILENCIOSO ---
+      stdout_original = sys.stdout # Salva o terminal real
+      sys.stdout = io.StringIO()   # Redireciona os prints do compilador para o "limbo"
+      
+      try:
+          main("main.por", "output")
+      finally:
+          sys.stdout = stdout_original # Devolve o terminal real, mesmo se der erro
+      # --- FIM DO MODO SILENCIOSO ---
+      
+      with open("output/main.py", "r", encoding="utf-8") as f:
+          codigo_python_gerado = f.read()
+      
+      print("\\033[1;32m[EXECUTANDO]\\033[0m")
+      print("")
+      exec(codigo_python_gerado, globals())
+          `);
     
     term.write('\r\n\x1b[1;32m[FIM DO PROGRAMA]\x1b[0m\r\n');
   } catch (err) {
