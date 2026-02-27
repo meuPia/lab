@@ -1,37 +1,77 @@
 import { EditorState } from "@codemirror/state";
 import { EditorView, basicSetup } from "codemirror";
 import { Compartment } from "@codemirror/state";
-import { python } from "@codemirror/lang-python";
+import { StreamLanguage } from "@codemirror/language";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 
-// ==========================================
-// 1. CONFIGURAÇÃO DO EDITOR (CodeMirror)
-// ==========================================
 const initialCode = `algoritmo "MissaoWeb"
 inicio
     escreva("Bem-vindo ao meuPiá no Navegador!")
 fimalgoritmo`;
 
-// Compartment permite reconfigurar extensões em tempo real (como o tema)
 const themeConfig = new Compartment();
+
+// ==========================================
+// 1.5 DEFINIÇÃO DA LINGUAGEM MEUPIÁ
+// ==========================================
+const meuPiaKeywords = [
+  "algoritmo", "var", "inicio", "fimalgoritmo", "se", "entao", "então", "senao", "senão",
+  "fim_se", "enquanto", "faca", "faça", "fimenquanto", "para", "de", "ate", "até",
+  "passo", "fim_para", "escreva", "leia", "usar", "e", "ou", "nao", "não"
+];
+const meuPiaTypes = ["inteiro", "string", "cadeia"];
+const meuPiaAtoms = ["verdadeiro", "falso"];
+
+const meuPiaLanguage = StreamLanguage.define({
+  token(stream, state) {
+    if (stream.eatSpace()) return null;
+
+    if (stream.match("//")) {
+      stream.skipToEnd();
+      return "comment";
+    }
+
+    if (stream.match(/^"[^"]*"/)) {
+      return "string";
+    }
+
+    if (stream.match(/^[0-9]+/)) {
+      return "number";
+    }
+
+    if (stream.match("<-") || stream.match(/^[+\-*/=<>]/)) {
+      return "operator";
+    }
+
+    if (stream.match(/^[\wÀ-ú]+/)) {
+      let word = stream.current().toLowerCase(); 
+      
+      if (meuPiaKeywords.includes(word)) return "keyword"; 
+      if (meuPiaTypes.includes(word)) return "typeName";   
+      if (meuPiaAtoms.includes(word)) return "atom";      
+      
+      return "variableName"; 
+    }
+
+    stream.next();
+    return null;
+  }
+});
 
 const view = new EditorView({
   state: EditorState.create({
     doc: initialCode,
     extensions: [
       basicSetup,
-      python(), // Usando highlighter de Python por enquanto (bem parecido com Portugol)
-      themeConfig.of(oneDark) // Inicia com tema escuro
+      meuPiaLanguage, // <-- TROQUE AQUI! Sai o python(), entra a nossa linguagem!
+      themeConfig.of(oneDark)
     ]
   }),
   parent: document.getElementById("editor-container")
 });
 
-// ==========================================
-// 2. CONFIGURAÇÃO DO TERMINAL (Xterm.js)
-// ==========================================
 const term = new Terminal({
   theme: { background: '#000000', foreground: '#ffffff' },
   cursorBlink: true,
@@ -47,37 +87,26 @@ fitAddon.fit();
 term.writeln('\x1b[1;32m> Terminal meuPiá Inicializado...\x1b[0m');
 term.writeln('Pronto para compilar.\n');
 
-// Redimensionamento responsivo
 window.addEventListener('resize', () => fitAddon.fit());
 
-// ==========================================
-// 3. LÓGICA DE TEMA (Dark/Light Mode)
-// ==========================================
 const themeBtn = document.getElementById("theme-btn");
 let isDark = true;
 
 themeBtn.addEventListener("click", () => {
   isDark = !isDark;
   
-  // 3.1 Atualiza Variáveis CSS do HTML
   document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
   themeBtn.textContent = isDark ? "☀️ Tema Claro" : "🌙 Tema Escuro";
   
-  // 3.2 Atualiza Tema do CodeMirror
-  // Se for dark, aplica o 'oneDark'. Se for light, passamos um array vazio (usa tema claro padrão)
   view.dispatch({
     effects: themeConfig.reconfigure(isDark ? oneDark : [])
   });
 
-  // 3.3 Atualiza Tema do Terminal
   term.options.theme = isDark 
     ? { background: '#000000', foreground: '#ffffff', cursor: '#ffffff' } 
     : { background: '#ffffff', foreground: '#333333', cursor: '#333333' };
 });
 
-// ==========================================
-// 5. INICIALIZAÇÃO DO PYODIDE (WebAssembly)
-// ==========================================
 let pyodide;
 const runBtn = document.getElementById("run-btn");
 async function initPyodide() {
@@ -86,18 +115,14 @@ async function initPyodide() {
   try {
     pyodide = await loadPyodide({
       indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/",
-      // CHECKPOINT 2: Redirecionando I/O
-      stdout: (text) => term.writeln(text), // Tudo que for 'print' vai pro terminal
-      stderr: (text) => term.writeln('\x1b[1;31m' + text + '\x1b[0m'), // Erros ficam vermelhos
+      stdout: (text) => term.writeln(text),
+      stderr: (text) => term.writeln('\x1b[1;31m' + text + '\x1b[0m'), 
       stdin: () => {
-        // O navegador exige que o 'input()' do Python seja síncrono.
-        // O prompt é a forma mais segura de contornar isso no client-side.
         let resposta = window.prompt("O programa está solicitando uma entrada de dados:");
         return resposta !== null ? resposta + "\n" : "\n";
       }
     });
     
-    // CHECKPOINT 3: Instalando o meupia-core do PyPI oficial!
     term.writeln('\x1b[1;34m> Baixando Compilador meuPiá v1.0...\x1b[0m');
     await pyodide.loadPackage("micropip");
     const micropip = pyodide.pyimport("micropip");
@@ -115,12 +140,8 @@ async function initPyodide() {
   }
 }
 
-// Inicia o processo assim que a página carrega
 initPyodide();
 
-// ==========================================
-// 4. BOTÃO DE EXECUÇÃO
-// ==========================================
 runBtn.addEventListener("click", async () => {
   if (!pyodide) return;
   
@@ -159,7 +180,6 @@ runBtn.addEventListener("click", async () => {
     
     term.write('\r\n\x1b[1;32m[FIM DO PROGRAMA]\x1b[0m\r\n');
   } catch (err) {
-    // AGORA SIM VAMOS VER O ERRO REAL:
     term.writeln(`\r\n\x1b[1;31m[ERRO DO SISTEMA]\x1b[0m`);
     term.writeln(err.toString());
   }
