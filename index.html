@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>meuPiá Web IDE</title>
+    <link rel="stylesheet" href="node_modules/@xterm/xterm/css/xterm.css" />
+    <style>
+      /* Variáveis de Tema Mestre */
+      :root {
+        --bg-color: #ffffff;
+        --text-color: #333333;
+        --header-bg: #f0f0f0;
+        --border-color: #dddddd;
+      }
+
+      [data-theme="dark"] {
+        --bg-color: #1e1e1e;
+        --text-color: #ffffff;
+        --header-bg: #2d2d2d;
+        --border-color: #333333;
+      }
+
+      body {
+        margin: 0; padding: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        display: flex; flex-direction: column; height: 100vh;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      
+      header {
+        background: var(--header-bg);
+        padding: 10px 20px;
+        display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 2px solid #4CAF50;
+        transition: background-color 0.3s;
+      }
+
+      .actions { display: flex; gap: 10px; }
+
+      button {
+        padding: 8px 16px; border: none; border-radius: 4px;
+        cursor: pointer; font-weight: bold; font-size: 14px;
+        transition: background-color 0.2s;
+      }
+
+      #theme-btn { background: #555; color: white; }
+      #theme-btn:hover { background: #777; }
+
+      #run-btn { background: #4CAF50; color: white; }
+      #run-btn:hover { background: #45a049; }
+
+      .ide-container { display: flex; flex: 1; overflow: hidden; }
+      
+      #editor-container { flex: 1; border-right: 1px solid var(--border-color); }
+      #terminal-container { flex: 1; padding: 10px; }
+
+      .cm-editor { height: 100%; } /* CodeMirror preenche o espaço */
+    </style>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+  </head>
+  <body>
+    <header>
+      <h2>🚀 meuPiá IDE</h2>
+      <div class="actions">
+        <button id="theme-btn">☀️ Tema Claro</button>
+        <button id="run-btn" disabled>⏳ Carregando Python...</button>
+      </div>
+    </header>
+    
+    <div class="ide-container">
+      <div id="editor-container"></div>
+      <div id="terminal-container"></div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
