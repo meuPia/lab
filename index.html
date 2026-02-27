@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>meuPiá Web IDE</title>
+    <title>meuPiá Lab</title>
     <link rel="stylesheet" href="node_modules/@xterm/xterm/css/xterm.css" />
     <style>
       /* Variáveis de Tema Mestre */
@@ -63,8 +63,12 @@
   </head>
   <body>
     <header>
-      <h2>🚀 meuPiá IDE</h2>
+      <h2>🚀 meuPiá Lab</h2>
       <div class="actions">
+        <input type="file" id="file-input" accept=".por,.txt" style="display: none;" />
+        
+        <button id="open-btn">📂 Abrir</button>
+        <button id="save-btn">💾 Salvar</button>
         <button id="theme-btn">☀️ Tema Claro</button>
         <button id="run-btn" disabled>⏳ Carregando Python...</button>
       </div>

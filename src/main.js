@@ -13,9 +13,6 @@ fimalgoritmo`;
 
 const themeConfig = new Compartment();
 
-// ==========================================
-// 1.5 DEFINIÇÃO DA LINGUAGEM MEUPIÁ
-// ==========================================
 const meuPiaKeywords = [
   "algoritmo", "var", "inicio", "fimalgoritmo", "se", "entao", "então", "senao", "senão",
   "fim_se", "enquanto", "faca", "faça", "fimenquanto", "para", "de", "ate", "até",
@@ -65,7 +62,7 @@ const view = new EditorView({
     doc: initialCode,
     extensions: [
       basicSetup,
-      meuPiaLanguage, // <-- TROQUE AQUI! Sai o python(), entra a nossa linguagem!
+      meuPiaLanguage, 
       themeConfig.of(oneDark)
     ]
   }),
@@ -183,4 +180,46 @@ runBtn.addEventListener("click", async () => {
     term.writeln(`\r\n\x1b[1;31m[ERRO DO SISTEMA]\x1b[0m`);
     term.writeln(err.toString());
   }
+});
+
+const openBtn = document.getElementById("open-btn");
+const saveBtn = document.getElementById("save-btn");
+const fileInput = document.getElementById("file-input");
+
+openBtn.addEventListener("click", () => {
+  fileInput.click(); 
+});
+
+fileInput.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const conteudo = e.target.result;
+    
+    view.dispatch({
+      changes: { from: 0, to: view.state.doc.length, insert: conteudo }
+    });
+    
+    term.writeln(`\x1b[1;32m> Arquivo '${file.name}' carregado com sucesso!\x1b[0m`);
+    fileInput.value = ""; 
+  };
+  reader.readAsText(file);
+});
+
+saveBtn.addEventListener("click", () => {
+  const codigo = view.state.doc.toString();
+  
+  const blob = new Blob([codigo], { type: "text/plain;charset=utf-8" });
+  
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "meu_algoritmo.por"; 
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  term.writeln('\x1b[1;32m> Download do arquivo iniciado!\x1b[0m');
 });
