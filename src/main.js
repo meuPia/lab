@@ -160,26 +160,37 @@ runBtn.addEventListener("click", async () => {
       
       os.makedirs("output", exist_ok=True)
       
+      # Remove o arquivo anterior para evitar falsos positivos
+      if os.path.exists("output/main.py"):
+          os.remove("output/main.py")
+      
       with open("main.por", "w", encoding="utf-8") as f:
           f.write(codigo_portugol)
       
       # --- INÍCIO DO MODO SILENCIOSO ---
-      stdout_original = sys.stdout # Salva o terminal real
-      sys.stdout = io.StringIO()   # Redireciona os prints do compilador para o "limbo"
+      stdout_original = sys.stdout 
+      limbo = io.StringIO()
+      sys.stdout = limbo   
       
       try:
         main("main.por", "output")
       finally:
-        sys.stdout = stdout_original # Devolve o terminal real, mesmo se der erro
+        sys.stdout = stdout_original 
       # --- FIM DO MODO SILENCIOSO ---
       
-      with open("output/main.py", "r", encoding="utf-8") as f:
-          codigo_python_gerado = f.read()
-      
-      print("\\033[1;32m[EXECUTANDO]\\033[0m")
-      print("")
-      exec(codigo_python_gerado, globals())
-          `);
+      # Verifica se o arquivo foi gerado (ou seja, se compilou com sucesso)
+      if not os.path.exists("output/main.py"):
+          # Se falhou, a gente cospe o erro real que ficou preso no limbo!
+          print("\\033[1;31m[ERRO DE COMPILAÇÃO]\\033[0m")
+          print(limbo.getvalue())
+      else:
+          with open("output/main.py", "r", encoding="utf-8") as f:
+              codigo_python_gerado = f.read()
+          
+          print("\\033[1;32m[EXECUTANDO]\\033[0m")
+          print("")
+          exec(codigo_python_gerado, globals())
+    `);
     
     term.write('\r\n\x1b[1;32m[FIM DO PROGRAMA]\x1b[0m\r\n');
   } catch (err) {
