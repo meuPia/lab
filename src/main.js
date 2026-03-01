@@ -9,13 +9,13 @@ import { FitAddon } from "@xterm/addon-fit";
 const initialCode = `algoritmo "MissaoWeb"
 inicio
     escreva("Bem-vindo ao meuPiá no Navegador!")
-fimalgoritmo`;
+fim_algoritmo`;
 
 const themeConfig = new Compartment();
 
 const meuPiaKeywords = [
-  "algoritmo", "var", "inicio", "fimalgoritmo", "se", "entao", "então", "senao", "senão",
-  "fim_se", "enquanto", "faca", "faça", "fimenquanto", "para", "de", "ate", "até",
+  "algoritmo", "var", "inicio", "fim_algoritmo", "se", "entao", "então", "senao", "senão",
+  "fim_se", "enquanto", "faca", "faça", "fim_enquanto", "para", "de", "ate", "até",
   "passo", "fim_para", "escreva", "leia", "usar", "e", "ou", "nao", "não"
 ];
 const meuPiaTypes = ["inteiro", "string", "cadeia"];
@@ -120,10 +120,10 @@ async function initPyodide() {
       }
     });
     
-    term.writeln('\x1b[1;34m> Baixando Compilador meuPiá v1.0...\x1b[0m');
+    term.writeln('\x1b[1;34m> Baixando Compilador meuPiá v1.1...\x1b[0m');
     await pyodide.loadPackage("micropip");
     const micropip = pyodide.pyimport("micropip");
-    await micropip.install("meupia-core");
+    await micropip.install("meupia-core==1.1.2");
     
     term.writeln('\x1b[1;32m> Ambiente 100% Pronto!\x1b[0m');
     term.writeln('====================================\n');
@@ -162,9 +162,9 @@ runBtn.addEventListener("click", async () => {
       sys.stdout = io.StringIO()   # Redireciona os prints do compilador para o "limbo"
       
       try:
-          main("main.por", "output")
+        main("main.por", "output")
       finally:
-          sys.stdout = stdout_original # Devolve o terminal real, mesmo se der erro
+        sys.stdout = stdout_original # Devolve o terminal real, mesmo se der erro
       # --- FIM DO MODO SILENCIOSO ---
       
       with open("output/main.py", "r", encoding="utf-8") as f:
