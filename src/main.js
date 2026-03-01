@@ -5,6 +5,7 @@ import { StreamLanguage } from "@codemirror/language";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
+import { undo, redo, history } from "@codemirror/commands";
 
 const initialCode = `algoritmo "MissaoWeb"
 inicio
@@ -63,7 +64,8 @@ const view = new EditorView({
     extensions: [
       basicSetup,
       meuPiaLanguage, 
-      themeConfig.of(oneDark)
+      themeConfig.of(oneDark),
+      history()
     ]
   }),
   parent: document.getElementById("editor-container")
@@ -93,7 +95,10 @@ themeBtn.addEventListener("click", () => {
   isDark = !isDark;
   
   document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
-  themeBtn.textContent = isDark ? "☀️ Tema Claro" : "🌙 Tema Escuro";
+  
+  // Troca a Lua pelo Sol dependendo do tema, e pede pro Lucide desenhar
+  themeBtn.innerHTML = isDark ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
+  lucide.createIcons(); 
   
   view.dispatch({
     effects: themeConfig.reconfigure(isDark ? oneDark : [])
@@ -129,7 +134,8 @@ async function initPyodide() {
     term.writeln('====================================\n');
     
     runBtn.disabled = false;
-    runBtn.textContent = "▶ Rodar Código";
+    runBtn.innerHTML = '<i data-lucide="play"></i> Rodar';
+    lucide.createIcons(); 
     
   } catch (err) {
     term.writeln('\x1b[1;31m> Falha Crítica:\x1b[0m');
@@ -184,7 +190,12 @@ runBtn.addEventListener("click", async () => {
 
 const openBtn = document.getElementById("open-btn");
 const saveBtn = document.getElementById("save-btn");
-const fileInput = document.getElementById("file-input");
+const fileInput = document.createElement("input");
+
+fileInput.type = "file";
+fileInput.accept = ".por,.txt"; 
+fileInput.style.display = "none";
+document.body.appendChild(fileInput);
 
 openBtn.addEventListener("click", () => {
   fileInput.click(); 
@@ -222,4 +233,23 @@ saveBtn.addEventListener("click", () => {
   document.body.removeChild(link);
   
   term.writeln('\x1b[1;32m> Download do arquivo iniciado!\x1b[0m');
+});
+
+document.getElementById("undo-btn").addEventListener("click", () => {
+  undo(view);
+});
+
+document.getElementById("redo-btn").addEventListener("click", () => {
+  redo(view);
+});
+
+document.getElementById("reset-btn").addEventListener("click", () => {
+  const confirmar = confirm("Atenção: Você está prestes a apagar todo o código e limpar o terminal. Deseja continuar?");
+  if (confirmar) {
+    view.dispatch({
+      changes: { from: 0, to: view.state.doc.length, insert: "" }
+    });
+    term.clear();
+    term.writeln('\x1b[1;32m> Ambiente redefinido.\x1b[0m\n');
+  }
 });
