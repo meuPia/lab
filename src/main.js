@@ -16,8 +16,8 @@ const themeConfig = new Compartment();
 
 const meuPiaKeywords = [
   "algoritmo", "var", "inicio", "fim_algoritmo", "se", "entao", "então", "senao", "senão",
-  "fim_se", "enquanto", "faca", "faça", "fim_enquanto", "para", "de", "ate", "até",
-  "passo", "fim_para", "escreva", "leia", "usar", "e", "ou", "nao", "não"
+  "fim_se", "enquanto", "faca", "faça", "fim_enquanto", "para", "de", "ate", "até", "retorne",
+  "passo", "fim_para", "escreva", "leia", "usar", "e", "ou", "nao", "não", "interrompa", "continue"
 ];
 const meuPiaTypes = ["inteiro", "string", "cadeia"];
 const meuPiaAtoms = ["verdadeiro", "falso"];
@@ -125,10 +125,10 @@ async function initPyodide() {
       }
     });
     
-    term.writeln('\x1b[1;34m> Baixando Compilador meuPiá v1.1...\x1b[0m');
+    term.writeln('\x1b[1;34m> Baixando Compilador meuPiá v1.1.3...\x1b[0m');
     await pyodide.loadPackage("micropip");
     const micropip = pyodide.pyimport("micropip");
-    await micropip.install("meupia-core==1.1.2");
+    await micropip.install("meupia-core==1.1.3");
     
     term.writeln('\x1b[1;32m> Ambiente 100% Pronto!\x1b[0m');
     term.writeln('====================================\n');
