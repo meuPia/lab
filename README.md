@@ -64,4 +64,4 @@ npx vite
 
 Contribuições são muito bem-vindas! Sinta-se à vontade para abrir uma *Issue* para relatar bugs ou enviar um *Pull Request* com melhorias para a interface ou integração com o compilador.
 
-Para alterações no motor da linguagem (compilador), visite o repositório oficial do [meuPiá Core](https://www.google.com/search?q=link-do-repo-core-aqui).
+Para alterações no motor da linguagem (compilador), visite o repositório oficial do [meuPiá Core](https://github.com/meuPia/lab).
