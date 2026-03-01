@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>meuPiá Lab</title>
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <link rel="stylesheet" href="node_modules/@xterm/xterm/css/xterm.css" />
     <style>
       /* Variáveis de Tema Mestre */
@@ -58,12 +59,29 @@
       #terminal-container { flex: 1; padding: 10px; }
 
       .cm-editor { height: 100%; } /* CodeMirror preenche o espaço */
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 12px; /* Espaço entre o logo e o texto */
+        margin: 0;
+        font-size: 1.5em;
+        font-weight: bold;
+      }
+
+      .site-logo {
+        height: 32px; /* Ajuste o tamanho do logo aqui se precisar */
+        width: auto;
+      }
+
     </style>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
   </head>
   <body>
     <header>
-      <h2>🚀 meuPiá Lab</h2>
+      <h2 class="logo-container">
+        <img src="/logo.svg" alt="Logo meuPiá" class="site-logo" />
+        meuPiá Lab
+      </h2>
       <div class="actions">
         <input type="file" id="file-input" accept=".por,.txt" style="display: none;" />
         
