@@ -69,7 +69,7 @@ const view = new EditorView({
       EditorView.lineWrapping
     ]
   }),
-  parent: document.getElementById("editor-container")
+  parent: document.getElementById("editor-pane")
 });
 
 const term = new Terminal({
@@ -81,7 +81,7 @@ const term = new Terminal({
 
 const fitAddon = new FitAddon();
 term.loadAddon(fitAddon);
-term.open(document.getElementById("terminal-container"));
+term.open(document.getElementById("terminal-pane"));
 fitAddon.fit();
 
 term.writeln('\x1b[1;32m> Terminal meuPiá Inicializado...\x1b[0m');
@@ -280,18 +280,51 @@ const fontsizeInput = document.getElementById('fontsize-input');
 const fontsizeDisplay = document.getElementById('fontsize-display');
 const ideContainer = document.querySelector('.ide-container');
 
+// ==========================================
+// MOTOR DE LAYOUT DINÂMICO (SPLIT.JS)
+// ==========================================
+let sideSplitInstance = null;
+
+// 1. Inicia o Split Mestre (Editor vs Lado Direito)
+Split(['#editor-pane', '#side-pane'], {
+  sizes: [55, 45], // 55% para o código, 45% para testes/terminal
+  minSize: 300,
+  gutterSize: 6,
+  onDrag: () => { fitAddon.fit(); } // O terminal se autoajusta ao arrastar!
+});
+
+// 2. Refatoração do applySettings
 function applySettings() {
-  ideContainer.classList.remove('layout-horizontal', 'layout-vertical');
-  ideContainer.classList.add(`layout-${userSettings.layout}`);
+  const sidePane = document.getElementById('side-pane');
   
+  // Destrói a divisão anterior se o aluno mudou a direção
+  if (sideSplitInstance) {
+    sideSplitInstance.destroy();
+  }
+  
+  // Muda a direção do flexbox do painel pai
+  sidePane.style.flexDirection = userSettings.layout === 'vertical' ? 'column' : 'row';
+
+  // Cria a nova divisão Testes vs Terminal baseada na escolha do usuário
+  sideSplitInstance = Split(['#test-pane', '#terminal-pane'], {
+    direction: userSettings.layout, // 'vertical' ou 'horizontal'
+    sizes: [50, 50],
+    minSize: 150,
+    gutterSize: 6,
+    onDrag: () => { fitAddon.fit(); }
+  });
+  
+  // Aplica as fontes
   document.documentElement.style.setProperty('--editor-font-size', `${userSettings.fontSize}px`);
-  
   term.options.fontSize = parseInt(userSettings.fontSize);
   
+  // Força o terminal a recalcular as colunas
   setTimeout(() => {
     fitAddon.fit();
-  }, 50); 
+    lucide.createIcons(); // Garante que o ícone do painel de testes carregue
+  }, 50);
   
+  // Salva no navegador
   localStorage.setItem('meupia_settings', JSON.stringify(userSettings));
 }
 

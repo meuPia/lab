@@ -107,8 +107,6 @@
         cursor: not-allowed;
       }
 
-      .ide-container { display: flex; flex: 1; overflow: hidden; }
-      
       #editor-container { flex: 1; border-right: 1px solid var(--border-color); }
       #terminal-container { flex: 1; padding: 10px; }
 
@@ -174,7 +172,47 @@
         height: 100%; 
         font-size: var(--editor-font-size, 14px); /* Fonte controlada por JS */
       }
+
+      .ide-container { display: flex; flex: 1; overflow: hidden; height: 100%; width: 100%; }
+      #editor-pane { overflow: hidden; display: flex; flex-direction: column; }
       
+      .side-split { display: flex; overflow: hidden; width: 100%; height: 100%; }
+      
+      #test-pane { background: var(--bg-color); display: flex; flex-direction: column; overflow-y: auto; }
+      #terminal-pane { background: #000; overflow: hidden; padding: 5px; }
+      
+      .pane-header {
+        padding: 8px 12px;
+        background: var(--header-bg);
+        border-bottom: 1px solid var(--border-color);
+        font-weight: bold; font-size: 0.9em;
+        display: flex; align-items: center; gap: 8px;
+      }
+      
+      #test-content { padding: 15px; font-size: 0.95em; line-height: 1.5; }
+
+      /* --- SPLIT.JS GUTTERS (BARRAS DE ARRASTAR) --- */
+      .gutter {
+        background-color: var(--border-color);
+        background-repeat: no-repeat;
+        background-position: 50%;
+        transition: background-color 0.2s;
+        z-index: 10;
+      }
+      
+      /* Brilha verde ao passar o mouse para o aluno saber que é arrastável */
+      .gutter:hover { background-color: #4CAF50; } 
+      
+      .gutter.gutter-horizontal {
+        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+        cursor: col-resize; width: 6px;
+      }
+      
+      .gutter.gutter-vertical {
+        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyCBKUAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFBgABEIAAEEAQQQQAABBAAAEEAAAEAAQQAABBAAAAEEAAAEAAAQQAAABAAAAAAQAAAAAABAAAAAQQQAAAAAAQAAAAAQAQA=');
+        cursor: row-resize; height: 6px;
+      }
+
       .ide-container.layout-horizontal { flex-direction: row; }
       .ide-container.layout-horizontal #editor-container { border-right: 1px solid var(--border-color); border-bottom: none; }
       
@@ -182,9 +220,11 @@
       .ide-container.layout-vertical #editor-container { border-bottom: 1px solid var(--border-color); border-right: none; height: 60%; flex: none; }
       .ide-container.layout-vertical #terminal-container { height: 40%; flex: none; }
 
+
     </style>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.js"></script>
   </head>
   <body>
 
@@ -222,10 +262,10 @@
         </div>
         <div class="modal-body">
           <div class="setting-group">
-            <label for="layout-select">Direção do Layout</label>
+            <label for="layout-select">Layout do Painel Auxiliar</label>
             <select id="layout-select">
-              <option value="horizontal">Lado a Lado (Editor Esq, Terminal Dir)</option>
-              <option value="vertical">Empilhado (Editor Cima, Terminal Baixo)</option>
+              <option value="vertical">Empilhado (Testes em cima, Terminal embaixo)</option>
+              <option value="horizontal">Lado a Lado (Testes Esq., Terminal Dir.)</option>
             </select>
           </div>
           <div class="setting-group">
@@ -238,10 +278,25 @@
         </div>
       </div>
     </div>
-    <div class="ide-container">
-      <div id="editor-container"></div>
-      <div id="terminal-container"></div>
+    <div class="ide-container" id="main-split">
+      <div id="editor-pane"></div>
+      
+      <div id="side-pane" class="side-split">
+        
+        <div id="test-pane">
+          <div class="pane-header">
+            <i data-lucide="check-circle"></i> Instruções & Testes
+          </div>
+          <div id="test-content">
+            <h3>Bem-vindo ao meuPiá!</h3>
+          </div>
+        </div>
+        
+        <div id="terminal-pane"></div>
+        
+      </div>
     </div>
+
 
     <script type="module" src="/src/main.js"></script>
 
