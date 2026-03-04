@@ -65,7 +65,8 @@ const view = new EditorView({
       basicSetup,
       meuPiaLanguage, 
       themeConfig.of(oneDark),
-      history()
+      history(),
+      EditorView.lineWrapping
     ]
   }),
   parent: document.getElementById("editor-container")
