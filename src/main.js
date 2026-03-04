@@ -265,3 +265,62 @@ document.getElementById("reset-btn").addEventListener("click", () => {
     term.writeln('\x1b[1;32m> Ambiente redefinido.\x1b[0m\n');
   }
 });
+
+// ==========================================
+// MOTOR DE CONFIGURAÇÕES (SETTINGS)
+// ==========================================
+const defaultSettings = { layout: 'horizontal', fontSize: 14 };
+let userSettings = JSON.parse(localStorage.getItem('meupia_settings')) || defaultSettings;
+
+const settingsModal = document.getElementById('settings-modal');
+const settingsBtn = document.getElementById('settings-btn');
+const closeSettingsBtn = document.getElementById('close-settings-btn');
+const layoutSelect = document.getElementById('layout-select');
+const fontsizeInput = document.getElementById('fontsize-input');
+const fontsizeDisplay = document.getElementById('fontsize-display');
+const ideContainer = document.querySelector('.ide-container');
+
+function applySettings() {
+  ideContainer.classList.remove('layout-horizontal', 'layout-vertical');
+  ideContainer.classList.add(`layout-${userSettings.layout}`);
+  
+  document.documentElement.style.setProperty('--editor-font-size', `${userSettings.fontSize}px`);
+  
+  term.options.fontSize = parseInt(userSettings.fontSize);
+  
+  setTimeout(() => {
+    fitAddon.fit();
+  }, 50); 
+  
+  localStorage.setItem('meupia_settings', JSON.stringify(userSettings));
+}
+
+settingsBtn.addEventListener('click', () => {
+  layoutSelect.value = userSettings.layout;
+  fontsizeInput.value = userSettings.fontSize;
+  fontsizeDisplay.textContent = `${userSettings.fontSize}px`;
+  settingsModal.classList.remove('hidden');
+});
+
+closeSettingsBtn.addEventListener('click', () => {
+  settingsModal.classList.add('hidden');
+});
+
+layoutSelect.addEventListener('change', (e) => {
+  userSettings.layout = e.target.value;
+  applySettings();
+});
+
+fontsizeInput.addEventListener('input', (e) => {
+  userSettings.fontSize = e.target.value;
+  fontsizeDisplay.textContent = `${userSettings.fontSize}px`;
+  applySettings();
+});
+
+settingsModal.addEventListener('click', (e) => {
+  if (e.target === settingsModal) {
+    settingsModal.classList.add('hidden');
+  }
+});
+
+applySettings();
