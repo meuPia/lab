@@ -126,10 +126,10 @@ async function initPyodide() {
       }
     });
     
-    term.writeln('\x1b[1;34m> Baixando Compilador meuPiá v1.1.3...\x1b[0m');
+    term.writeln('\x1b[1;34m> Baixando Compilador meuPiá v1.1.4...\x1b[0m');
     await pyodide.loadPackage("micropip");
     const micropip = pyodide.pyimport("micropip");
-    await micropip.install("meupia-core==1.1.3");
+    await micropip.install("meupia-core==1.1.4");
     
     term.writeln('\x1b[1;32m> Ambiente 100% Pronto!\x1b[0m');
     term.writeln('====================================\n');
@@ -283,48 +283,73 @@ const ideContainer = document.querySelector('.ide-container');
 // ==========================================
 // MOTOR DE LAYOUT DINÂMICO (SPLIT.JS)
 // ==========================================
+let mainSplitInstance = null;
 let sideSplitInstance = null;
 
-// 1. Inicia o Split Mestre (Editor vs Lado Direito)
-Split(['#editor-pane', '#side-pane'], {
-  sizes: [55, 45], // 55% para o código, 45% para testes/terminal
-  minSize: 300,
-  gutterSize: 6,
-  onDrag: () => { fitAddon.fit(); } // O terminal se autoajusta ao arrastar!
-});
+let currentInstructions = "";
+function setInstructions(markdownText) {
+  currentInstructions = markdownText;
+  document.getElementById('test-content').innerHTML = markdownText;
+  applySettings(); 
+}
 
-// 2. Refatoração do applySettings
 function applySettings() {
+  const ideContainer = document.getElementById('main-split');
   const sidePane = document.getElementById('side-pane');
-  
-  // Destrói a divisão anterior se o aluno mudou a direção
-  if (sideSplitInstance) {
-    sideSplitInstance.destroy();
-  }
-  
-  // Muda a direção do flexbox do painel pai
-  sidePane.style.flexDirection = userSettings.layout === 'vertical' ? 'column' : 'row';
+  const testPane = document.getElementById('test-pane');
+  const terminalPane = document.getElementById('terminal-pane');
 
-  // Cria a nova divisão Testes vs Terminal baseada na escolha do usuário
-  sideSplitInstance = Split(['#test-pane', '#terminal-pane'], {
-    direction: userSettings.layout, // 'vertical' ou 'horizontal'
-    sizes: [50, 50],
-    minSize: 150,
+  // 1. Limpeza de Terreno: Destrói os splits antigos antes de recriar
+  if (mainSplitInstance) mainSplitInstance.destroy();
+  if (sideSplitInstance) sideSplitInstance.destroy();
+
+  // Limpa estilos inline residuais que o Split.js deixa
+  testPane.style = '';
+  terminalPane.style = '';
+  sidePane.style = '';
+
+  const hasInstructions = currentInstructions.trim().length > 0;
+
+  // 2. Visibilidade do Painel de Instruções
+  if (hasInstructions) {
+    testPane.classList.remove('hidden');
+  } else {
+    testPane.classList.add('hidden');
+  }
+
+  ideContainer.style.flexDirection = userSettings.layout === 'vertical' ? 'column' : 'row';
+
+  mainSplitInstance = Split(['#editor-pane', '#side-pane'], {
+    direction: userSettings.layout, // 'vertical' ou 'horizontal' baseado no Modal
+    sizes: [55, 45],
+    minSize: 200,
     gutterSize: 6,
     onDrag: () => { fitAddon.fit(); }
   });
-  
-  // Aplica as fontes
+
+  sidePane.style.flexDirection = 'column';
+
+  if (hasInstructions) {
+    sideSplitInstance = Split(['#test-pane', '#terminal-pane'], {
+      direction: 'vertical', // Sempre vertical como no Codewars!
+      sizes: [40, 60],
+      minSize: 100,
+      gutterSize: 6,
+      onDrag: () => { fitAddon.fit(); }
+    });
+  } else {
+    terminalPane.style.height = '100%';
+    terminalPane.style.width = '100%';
+  }
+
   document.documentElement.style.setProperty('--editor-font-size', `${userSettings.fontSize}px`);
   term.options.fontSize = parseInt(userSettings.fontSize);
-  
-  // Força o terminal a recalcular as colunas
+
   setTimeout(() => {
     fitAddon.fit();
-    lucide.createIcons(); // Garante que o ícone do painel de testes carregue
+    lucide.createIcons();
   }, 50);
-  
-  // Salva no navegador
+
   localStorage.setItem('meupia_settings', JSON.stringify(userSettings));
 }
 
