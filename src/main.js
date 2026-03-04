@@ -17,7 +17,8 @@ const themeConfig = new Compartment();
 const meuPiaKeywords = [
   "algoritmo", "var", "inicio", "fim_algoritmo", "se", "entao", "então", "senao", "senão",
   "fim_se", "enquanto", "faca", "faça", "fim_enquanto", "para", "de", "ate", "até", "retorne",
-  "passo", "fim_para", "escreva", "leia", "usar", "e", "ou", "nao", "não", "interrompa", "continue"
+  "passo", "fim_para", "escreva", "leia", "usar", "e", "ou", "nao", "não", "interrompa", "continue", 
+  "classe", "metodo", "funcao", "função", "novo", "fim_classe" 
 ];
 const meuPiaTypes = ["inteiro", "string", "cadeia"];
 const meuPiaAtoms = ["verdadeiro", "falso"];
@@ -185,13 +186,24 @@ runBtn.addEventListener("click", async () => {
           print("\\033[1;31m[ERRO DE COMPILAÇÃO]\\033[0m")
           print(limbo.getvalue())
       else:
-          with open("output/main.py", "r", encoding="utf-8") as f:
-              codigo_python_gerado = f.read()
+        if not os.path.exists("output/main.py"):
+            print("\\033[1;31m[ERRO DE COMPILAÇÃO]\\033[0m")
+            print(limbo.getvalue())
+        else:
+            with open("output/main.py", "r", encoding="utf-8") as f:
+                codigo_python_gerado = f.read()
+            
+            print("\\033[1;32m[EXECUTANDO]\\033[0m")
+            print("")
+            
+            # NOVO BLOCO TRY/EXCEPT AQUI:
+            try:
+                exec(codigo_python_gerado, globals())
+            except SystemExit:
+                # Silencia a exceção de saída e encerra o programa graciosamente
+                pass
+      `);
           
-          print("\\033[1;32m[EXECUTANDO]\\033[0m")
-          print("")
-          exec(codigo_python_gerado, globals())
-    `);
     
     term.write('\r\n\x1b[1;32m[FIM DO PROGRAMA]\x1b[0m\r\n');
   } catch (err) {
