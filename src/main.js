@@ -394,3 +394,46 @@ settingsModal.addEventListener('click', (e) => {
 });
 
 applySettings();
+
+const packagesModal = document.getElementById('packages-modal');
+const packagesBtn = document.getElementById('packages-btn');
+const closePackagesBtn = document.getElementById('close-packages-btn');
+const installButtons = document.querySelectorAll('.install-btn');
+const packageLog = document.getElementById('package-status-log');
+
+packagesBtn.addEventListener('click', () => { packagesModal.classList.remove('hidden'); });
+closePackagesBtn.addEventListener('click', () => { packagesModal.classList.add('hidden'); });
+packagesModal.addEventListener('click', (e) => {
+  if (e.target === packagesModal) packagesModal.classList.add('hidden');
+});
+
+installButtons.forEach(btn => {
+  btn.addEventListener('click', async (e) => {
+    const pluginName = e.target.getAttribute('data-plugin');
+    const packageName = `meupia-${pluginName}`; 
+    
+    e.target.disabled = true;
+    e.target.textContent = "Instalando...";
+    packageLog.style.color = "#ffeb3b"; // Amarelo
+    packageLog.textContent = `[mpgp] Baixando ${packageName} do PyPI... aguarde.`;
+
+    try {
+      await pyodide.loadPackage("micropip");
+      const micropip = pyodide.pyimport("micropip");
+      await micropip.install(packageName);
+      
+      e.target.textContent = "Instalado";
+      e.target.classList.add("installed");
+      packageLog.style.color = "#4CAF50"; // Verde
+      packageLog.textContent = `[mpgp] Sucesso! Pacote '${pluginName}' pronto para uso.`;
+      
+    } catch (error) {
+      e.target.disabled = false;
+      e.target.textContent = "Tentar Novamente";
+      packageLog.style.color = "#f44336"; // Vermelho
+      packageLog.textContent = `[mpgp] Erro ao instalar ${pluginName}: ${error.message}`;
+    }
+  });
+});
+
+setTimeout(() => lucide.createIcons(), 100);
