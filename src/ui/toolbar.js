@@ -2,14 +2,12 @@ import { undo, redo } from "@codemirror/commands";
 import { oneDark } from "@codemirror/theme-one-dark";
 
 export function setupToolbar(view, term, themeConfig) {
-    // Configuração do Input File Invisível
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = ".por,.txt";
     fileInput.style.display = "none";
     document.body.appendChild(fileInput);
 
-    // Abrir Ficheiro
     document.getElementById("open-btn").addEventListener("click", () => fileInput.click());
     fileInput.addEventListener("change", (event) => {
         const file = event.target.files[0];
@@ -23,7 +21,6 @@ export function setupToolbar(view, term, themeConfig) {
         reader.readAsText(file);
     });
 
-    // Salvar Ficheiro
     document.getElementById("save-btn").addEventListener("click", () => {
         const blob = new Blob([view.state.doc.toString()], { type: "text/plain;charset=utf-8" });
         const link = document.createElement("a");
@@ -35,11 +32,9 @@ export function setupToolbar(view, term, themeConfig) {
         term.writeln('\x1b[1;32m> Download iniciado!\x1b[0m');
     });
 
-    // Ações de Histórico
     document.getElementById("undo-btn").addEventListener("click", () => undo(view));
     document.getElementById("redo-btn").addEventListener("click", () => redo(view));
 
-    // Resetar Ambiente
     document.getElementById("reset-btn").addEventListener("click", () => {
         if (confirm("Apagar todo o código e limpar o terminal?")) {
             view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: "" } });
@@ -48,7 +43,6 @@ export function setupToolbar(view, term, themeConfig) {
         }
     });
 
-    // Tema Claro/Escuro
     const themeBtn = document.getElementById("theme-btn");
     let isDark = true;
     themeBtn.addEventListener("click", () => {

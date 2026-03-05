@@ -5,16 +5,13 @@ export function initPackageManager(getPyodideInstance) {
     const installButtons = document.querySelectorAll('.install-btn');
     const packageLog = document.getElementById('package-status-log');
   
-    // Abrir e Fechar Modal
     packagesBtn.addEventListener('click', () => { packagesModal.classList.remove('hidden'); });
     closePackagesBtn.addEventListener('click', () => { packagesModal.classList.add('hidden'); });
     packagesModal.addEventListener('click', (e) => {
       if (e.target === packagesModal) packagesModal.classList.add('hidden');
     });
   
-    // Instalação via micropip
     installButtons.forEach(btn => {
-      // CORREÇÃO DO BUG AQUI: Apenas um 'async'
       btn.addEventListener('click', async (e) => {
         const pyodide = getPyodideInstance();
         if (!pyodide) {
