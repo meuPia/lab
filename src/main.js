@@ -4,7 +4,7 @@ import { oneDark } from "@codemirror/theme-one-dark";
 import { history } from "@codemirror/commands";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
-import { meuPiaLanguage } from "./editor/meupia-lang.js";
+import { meuPiaLanguage, meuPiaAutocompletion } from "./editor/meupia-lang.js";
 import { initWasmEngine, runWasmCode, getPyodide } from "./engine/wasm.js";
 import { carregarDesafioDaURL, desafioAtual } from "./engine/desafios.js";
 import { renderDesafio, parseTestLine } from "./ui/instructions.js";
@@ -48,6 +48,7 @@ const view = new EditorView({
     extensions: [ 
       basicSetup, 
       meuPiaLanguage, 
+      meuPiaAutocompletion,
       themeConfig.of(oneDark), 
       history(), 
       EditorView.lineWrapping 
