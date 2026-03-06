@@ -169,3 +169,29 @@ header {
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyCBKUAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFBgABEIAAEEAQQQQAABBAAAEEAAAEAAQQAABBAAAAEEAAAEAAAQQAAABAAAAAAQAAAAAABAAAAAQQQAAAAAAQAAAAAQAQA=');
   cursor: row-resize; height: 6px;
 }
+
+.test-results-container {
+  margin-top: 20px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 15px;
+}
+
+.test-item {
+  padding: 8px;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
+.test-item.success {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.test-item.fail {
+  background: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
