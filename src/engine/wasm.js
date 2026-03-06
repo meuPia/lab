@@ -1,6 +1,7 @@
 import { desafioAtual } from "./desafios.js";
 
 let pyodide = null;
+let version = "1.1.8"
 
 export const getPyodide = () => pyodide;
 
@@ -18,7 +19,6 @@ export async function initWasmEngine(term, runBtn) {
             }
         });
 
-        let version = "1.1.7"
         term.writeln('\x1b[1;34m> Baixando Compilador meuPiá v' + version + '...\x1b[0m');
         await pyodide.loadPackage("micropip");
         const micropip = pyodide.pyimport("micropip");
