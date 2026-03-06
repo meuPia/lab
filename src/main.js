@@ -6,11 +6,13 @@ import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { meuPiaLanguage } from "./editor/meupia-lang.js";
 import { initWasmEngine, runWasmCode, getPyodide } from "./engine/wasm.js";
-import { desafioAtual } from "./engine/wasm.js"; // Importamos o desafio do motor
+import { carregarDesafioDaURL, desafioAtual } from "./engine/desafios.js";
 import { renderDesafio, parseTestLine } from "./ui/instructions.js";
 import { setupToolbar } from "./ui/toolbar.js";
 import { setupLayout } from "./ui/layout.js";
 import { initPackageManager } from "./ui/mpgp.js";
+
+const hasDesafio = await carregarDesafioDaURL();
 
 const term = new Terminal({ 
   theme: { background: '#000000', foreground: '#ffffff' }, 
@@ -31,9 +33,18 @@ term.writeln = (text) => {
 window.addEventListener('resize', () => fitAddon.fit());
 
 const themeConfig = new Compartment();
+let docInicial = `algoritmo "MissaoWeb"\ninicio\n    escreva("meuPiá Lab pronto!")\nfim_algoritmo`;
+if (hasDesafio) {
+  if (desafioAtual.codigoInicial) {
+      docInicial = desafioAtual.codigoInicial;
+  } else {
+      docInicial = `algoritmo "${desafioAtual.id}"\ninicio\n    // Escreva sua solução aqui\nfim_algoritmo`;
+  }
+}
+
 const view = new EditorView({
   state: EditorState.create({
-    doc: `algoritmo "MissaoWeb"\ninicio\n    escreva("meuPiá Lab pronto para o desafio!")\nfim_algoritmo`,
+    doc: docInicial,
     extensions: [ 
       basicSetup, 
       meuPiaLanguage, 
@@ -49,11 +60,15 @@ setupToolbar(view, term, themeConfig);
 setupLayout(term, fitAddon);
 initPackageManager(getPyodide); 
 
-if (desafioAtual) {
-    renderDesafio(desafioAtual);
-    if (window.setInstructions) {
-        window.setInstructions(document.getElementById('test-content').innerHTML);
-    }
+if (hasDesafio) {
+  renderDesafio(desafioAtual);
+  if (window.setInstructions) {
+      window.setInstructions(document.getElementById('test-content').innerHTML);
+  }
+} else {
+  if (window.setInstructions) {
+      window.setInstructions(""); 
+  }
 }
 
 const runBtn = document.getElementById("run-btn");

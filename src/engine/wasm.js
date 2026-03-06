@@ -1,3 +1,5 @@
+import { desafioAtual } from "./desafios.js";
+
 let pyodide = null;
 
 export const getPyodide = () => pyodide;
@@ -36,16 +38,6 @@ export async function initWasmEngine(term, runBtn) {
     }
 }
 
-export const desafioAtual = {
-    id: "soma_simples",
-    titulo: "Missão: Somar Dois Números",
-    instrucoes: "### Desafio\nCrie uma função chamada `somar` que receba dois parâmetros e retorne a soma deles.",
-    codigoTeste: `
-    esperar_igual(somar(2, 3), 5, "Soma de 2 + 3")
-    esperar_igual(somar(10, 20), 30, "Soma de números negativos")
-    `
-};
-
 export async function runWasmCode(view, term) {
     const pyodideInstance = getPyodide();
     if (!pyodideInstance) return;
@@ -66,7 +58,7 @@ export async function runWasmCode(view, term) {
         codigoFinal += `\nfim_algoritmo`;
     }
 
-    term.write('\r\n\x1b[1;34m[COMPILANDO COM DESAFIO]\x1b[0m\r\n');
+    term.write('\r\n\x1b[1;34m[COMPILANDO' + (desafioAtual ? ' COM DESAFIO' : '') + ']\x1b[0m\r\n');
 
     try {
         pyodideInstance.globals.set("codigo_portugol", codigoFinal);
