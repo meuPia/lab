@@ -2,13 +2,13 @@ import { marked } from 'marked'; // Você precisará de: npm install marked
 
 export function renderDesafio(desafio) {
     const container = document.getElementById('test-content');
-    
+    const textoMarkdown = desafio.instrucoes || desafio.descricao || "Nenhuma instrução fornecida para este desafio.";
     container.innerHTML = `
         <div class="desafio-header">
             <h2>${desafio.titulo}</h2>
         </div>
         <div class="desafio-instrucoes">
-            ${marked.parse(desafio.instrucoes)}
+            ${marked.parse(textoMarkdown)}
         </div>
         <div id="test-results" class="test-results-container">
             </div>

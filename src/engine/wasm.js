@@ -1,7 +1,7 @@
 import { desafioAtual } from "./desafios.js";
 
 let pyodide = null;
-let version = "1.1.8"
+let version = "1.1.12"
 
 export const getPyodide = () => pyodide;
 
@@ -24,6 +24,12 @@ export async function initWasmEngine(term, runBtn) {
         const micropip = pyodide.pyimport("micropip");
         await micropip.install("meupia-core=="+version);
         await micropip.install("meupia-testes");
+
+        if (desafioAtual && desafioAtual.mapa) {
+            term.writeln('\x1b[1;36m> Detectado Mapa 2D: Auto-instalando plugin "grid"...\x1b[0m');
+            const gridUrl = "https://cdn.jsdelivr.net/gh/meuPia/grid@main/dist/meupia_grid-1.0.0-py3-none-any.whl";
+            await micropip.install(gridUrl);
+        }
 
         term.writeln('\x1b[1;32m> Ambiente 100% Pronto!\x1b[0m');
         term.writeln('====================================\n');
