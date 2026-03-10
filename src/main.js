@@ -36,6 +36,13 @@ window.addEventListener('resize', () => fitAddon.fit());
 const themeConfig = new Compartment();
 let docInicial = `algoritmo "MissaoWeb"\ninicio\n    escreva("meuPiá Lab pronto!")\nfim_algoritmo`;
 if (hasDesafio) {
+  const tabGrid = document.getElementById('tab-grid');
+  if (hasDesafio && desafioAtual.mapa) {
+      tabGrid.style.display = ''; 
+  } else {
+      tabGrid.style.display = 'none'; 
+  }
+
   if (desafioAtual.codigoInicial) {
       docInicial = desafioAtual.codigoInicial;
   } else {
@@ -115,14 +122,15 @@ runBtn.addEventListener("click", async () => {
     }
   
     await runWasmCode(view, term);
-
     if (window.meuPiaGridAPI && window.meuPiaGridAPI.hasAnimation()) {
-        const tabGrid = document.getElementById('tab-grid');
-        
-        if (tabGrid && !tabGrid.classList.contains('active')) {
-            tabGrid.click(); 
-        }
-        window.meuPiaGridAPI.play();
+      const tabGrid = document.getElementById('tab-grid');
+      if (tabGrid) {
+          tabGrid.style.display = ''; 
+          if (!tabGrid.classList.contains('active')) {
+              tabGrid.click(); 
+          }
+      }
+      window.meuPiaGridAPI.play();
     }
 });
 

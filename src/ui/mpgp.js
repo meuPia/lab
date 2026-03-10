@@ -47,6 +47,10 @@ export function initPackageManager(getPyodideInstance) {
         e.target.classList.add("installed");
         packageLog.style.color = "#4CAF50";
         packageLog.textContent = `[mpgp] Sucesso! Pacote '${pluginName}' pronto para uso.`;
+        if (pluginName === 'grid') {
+            const tabGrid = document.getElementById('tab-grid');
+            if (tabGrid) tabGrid.style.display = '';
+        }
         
       } catch (error) {
         e.target.disabled = false;
