@@ -7,6 +7,11 @@ export function setupLayout(term, fitAddon) {
     const fontsizeInput = document.getElementById('fontsize-input');
     const fontsizeDisplay = document.getElementById('fontsize-display');
 
+    const tabInstrucoes = document.getElementById('tab-instrucoes');
+    const tabGrid = document.getElementById('tab-grid');
+    const contentInstrucoes = document.getElementById('test-content');
+    const contentGrid = document.getElementById('grid-content');
+
     let mainSplitInstance = null;
     let sideSplitInstance = null;
     let currentInstructions = "";
@@ -54,6 +59,24 @@ export function setupLayout(term, fitAddon) {
 
         setTimeout(() => { fitAddon.fit(); if (window.lucide) window.lucide.createIcons(); }, 50);
         localStorage.setItem('meupia_settings', JSON.stringify(userSettings));
+
+        if (tabInstrucoes && tabGrid) {
+            tabInstrucoes.addEventListener('click', () => {
+                tabInstrucoes.classList.add('active');
+                tabGrid.classList.remove('active');
+                contentInstrucoes.classList.remove('hidden');
+                contentGrid.classList.add('hidden');
+            });
+    
+            tabGrid.addEventListener('click', () => {
+                tabGrid.classList.add('active');
+                tabInstrucoes.classList.remove('active');
+                contentGrid.classList.remove('hidden');
+                contentInstrucoes.classList.add('hidden');
+                
+                if (window.lucide) window.lucide.createIcons();
+            });
+        }
     }
 
     document.getElementById('settings-btn').addEventListener('click', () => {
