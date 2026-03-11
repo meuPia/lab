@@ -1,7 +1,7 @@
 import { desafioAtual } from "./desafios.js";
 
 let pyodide = null;
-let version = "1.1.13"
+let version = "1.1.14"
 
 export const getPyodide = () => pyodide;
 
