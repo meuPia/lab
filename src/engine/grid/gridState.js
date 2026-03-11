@@ -43,11 +43,6 @@ export class GridState {
 
     getCurrentFrame() {
         if (this.timeline.length === 0) return null;
-        return this.timeline[this.timeline.length - 1];
-    }
-
-    getCurrentFrame() {
-        if (this.timeline.length === 0) return null;
         return this.timeline[this.currentStepIndex];
     }
 

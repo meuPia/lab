@@ -102,7 +102,8 @@ export class GridManager {
     }
 
     visitarCelula(x, y, step) {
-        this.state.addFrame({ action: 'visit', x: x, y: y, step: step });
+        let acao = step >= 9000 ? 'caminho' : 'visitado';
+        this.state.addFrame({ action: acao, x: x, y: y, step: step });
         this.update();
     }
 
@@ -138,6 +139,9 @@ export class GridManager {
                 const cell = this.state.getCell(c.x, c.y);
                 if (cell) {
                     Object.assign(cell, c);
+                    if (c.tipo) {
+                        cell.type = c.tipo;
+                    }
                 }
             });
         } else if (mapa.paredes) {
