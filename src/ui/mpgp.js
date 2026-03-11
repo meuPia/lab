@@ -6,7 +6,7 @@ export function initPackageManager(getPyodideInstance) {
   const packageLog = document.getElementById('package-status-log');
 
   const pluginRegistry = {
-      "grid": "https://cdn.jsdelivr.net/gh/meuPia/grid@main/dist/meupia_grid-1.0.1-py3-none-any.whl",
+      "grid": "https://cdn.jsdelivr.net/gh/meuPia/grid@main/dist/meupia_grid-1.0.2-py3-none-any.whl",
       "ia": "https://cdn.jsdelivr.net/gh/meuPia/ia@master/dist/meupia_ia-0.1.0-py3-none-any.whl",
   };
 

@@ -27,7 +27,7 @@ export async function initWasmEngine(term, runBtn) {
 
         if (desafioAtual && desafioAtual.mapa) {
             term.writeln('\x1b[1;36m> Detectado Mapa 2D: Auto-instalando plugin "grid"...\x1b[0m');
-            const gridUrl = "https://cdn.jsdelivr.net/gh/meuPia/grid@main/dist/meupia_grid-1.0.1-py3-none-any.whl";
+            const gridUrl = "https://cdn.jsdelivr.net/gh/meuPia/grid@main/dist/meupia_grid-1.0.2-py3-none-any.whl";
             await micropip.install(gridUrl);
         }
 

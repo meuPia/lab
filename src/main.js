@@ -84,19 +84,17 @@ const runBtn = document.getElementById("run-btn");
 const gridManager = new GridManager();
 
 window.meuPiaGridAPI = {
-    iniciar: (w, h) => gridManager.iniciarGrid(w, h),
-    parede: (x, y) => gridManager.definirParede(x, y),
-    visitar: (x, y, step) => gridManager.visitarCelula(x, y, step),
-    reset: () => gridManager.reset(),
-    play: () => gridManager.autoPlay(),
-    hasAnimation: () => gridManager.hasAnimation(),
-    carregarMapa: (mapa) => gridManager.carregarMapaDesafio(mapa),
-    sensor: (x, y) => gridManager.sensorCelula(x, y),
-
-    chegouNoObjetivo: (alvo_x, alvo_y) => {
+  iniciar: (w, h) => gridManager.iniciarGrid(w, h),
+  parede: (x, y) => gridManager.definirParede(x, y),
+  visitar: (x, y, step) => gridManager.visitarCelula(x, y, step),
+  reset: () => gridManager.reset(),
+  play: () => gridManager.autoPlay(),
+  hasAnimation: () => gridManager.hasAnimation(),
+  carregarMapa: (mapa) => gridManager.carregarMapaDesafio(mapa),
+  sensor: (x, y) => gridManager.sensorCelula(x, y),
+  chegouNoObjetivo: (alvo_x, alvo_y) => {
       const timeline = gridManager.state.timeline;
       if (timeline.length === 0) return false;
-      
       const ultimoPasso = timeline[timeline.length - 1];
       return ultimoPasso.x === alvo_x && ultimoPasso.y === alvo_y;
   }
@@ -109,17 +107,13 @@ if (hasDesafio && desafioAtual.mapa) {
 runBtn.addEventListener("click", async () => {
     const resultsContainer = document.getElementById('test-results');
     if (resultsContainer) resultsContainer.innerHTML = '';
-  
-    if (window.meuPiaGridAPI) {
-        window.meuPiaGridAPI.reset();
-        if (hasDesafio && desafioAtual.mapa) {
-          const mapa = desafioAtual.mapa;
-          window.meuPiaGridAPI.iniciar(mapa.largura || 10, mapa.altura || 10);
-          if (mapa.paredes) {
-              mapa.paredes.forEach(c => window.meuPiaGridAPI.parede(c[0], c[1]));
-          }
+      if (window.meuPiaGridAPI) {
+      if (hasDesafio && desafioAtual.mapa) {
+          window.meuPiaGridAPI.carregarMapa(desafioAtual.mapa);
+      } else {
+          window.meuPiaGridAPI.reset();
       }
-    }
+  }
   
     await runWasmCode(view, term);
     if (window.meuPiaGridAPI && window.meuPiaGridAPI.hasAnimation()) {
