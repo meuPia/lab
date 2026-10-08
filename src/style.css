@@ -143,6 +143,8 @@ header {
 .ide-container { display: flex; flex: 1; overflow: hidden; height: 100%; width: 100%; }
 #editor-pane { overflow: hidden; display: flex; flex-direction: column; }
 .cm-editor { height: 100%; font-size: var(--editor-font-size, 14px); }
+.cm-editor .cm-linha-erro { background: rgba(244, 67, 54, 0.15); }
+.cm-editor .cm-coluna-erro { text-decoration: underline wavy #f44336; text-underline-offset: 3px; }
 
 .side-split { display: flex; overflow: hidden; width: 100%; height: 100%; }
 

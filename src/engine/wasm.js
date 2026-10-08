@@ -1,7 +1,11 @@
 import { desafioAtual } from "./desafios.js";
+import { extrairMensagemErro, mapearLinhaErro, formatarMensagemErro } from "./erros.js";
+import { marcarErroCompilacao, limparErroCompilacao } from "../editor/meupia-lang.js";
 
 let pyodide = null;
-let version = "1.1.20"
+let version = "1.2.0"
+
+const contarLinhas = (texto) => texto.split("\n").length;
 
 export const getPyodide = () => pyodide;
 
@@ -50,18 +54,28 @@ export async function runWasmCode(view, term) {
     
     let codigoOriginal = view.state.doc.toString();
     let codigoFinal = codigoOriginal;
+    // Informações da montagem do desafio, para converter a linha do erro na linha do editor.
+    let infoMontagem = null;
 
     if (desafioAtual && desafioAtual.codigoTeste) {
         codigoFinal = codigoOriginal.replace(/fim_algoritmo/gi, "");
+        let linhaUsarTestes = null;
 
         if (!codigoFinal.toLowerCase().includes('usar "testes"')) {
             const regexAlgoritmo = /(algoritmo\s+"[^"]*")/i;
+            const matchAlgoritmo = codigoFinal.match(regexAlgoritmo);
+            if (matchAlgoritmo) {
+                linhaUsarTestes = contarLinhas(codigoFinal.slice(0, matchAlgoritmo.index + matchAlgoritmo[0].length)) + 1;
+            }
             codigoFinal = codigoFinal.replace(regexAlgoritmo, '$1\nusar "testes"');
         }
 
+        const inicioAnexo = contarLinhas(codigoFinal) + 1;
         codigoFinal += `\n\n// --- TESTES AUTOMATIZADOS ---\n`;
         codigoFinal += desafioAtual.codigoTeste;
         codigoFinal += `\nfim_algoritmo`;
+
+        infoMontagem = { linhaUsarTestes, inicioAnexo, linhaFimAnexado: contarLinhas(codigoFinal) };
     }
 
     term.write('\r\n\x1b[1;34m[COMPILANDO' + (desafioAtual ? ' COM DESAFIO' : '') + ']\x1b[0m\r\n');
@@ -87,24 +101,48 @@ limbo = io.StringIO()
 sys.stdout = limbo   
 
 try:
-    main("main.por", "output")
+    codigo_retorno = main("main.por", "output")
 finally:
-    sys.stdout = stdout_original 
+    sys.stdout = stdout_original
 
-if not os.path.exists("output/main.py"):
-    print("\\033[1;31m[ERRO DE COMPILAÇÃO]\\033[0m")
-    print(limbo.getvalue())
-else:
-    with open("output/main.py", "r", encoding="utf-8") as f:
-        codigo_python_gerado = f.read()
-    
-    print("\\033[1;32m[EXECUTANDO]\\033[0m")
-    print("")
-    
-    try:
-        exec(codigo_python_gerado, globals())
-    except SystemExit:
-        pass
+if codigo_retorno is None:
+    codigo_retorno = -1
+saida_compilador = limbo.getvalue()
+gerou_py = os.path.exists("output/main.py")
+        `);
+
+        const codigoRetorno = pyodideInstance.globals.get("codigo_retorno");
+        const saidaCompilador = pyodideInstance.globals.get("saida_compilador");
+        const gerouPy = pyodideInstance.globals.get("gerou_py");
+
+        if (codigoRetorno !== 0 || !gerouPy) {
+            const erro = extrairMensagemErro(saidaCompilador);
+            const mapeado = erro.linha !== null ? mapearLinhaErro(erro.linha, infoMontagem) : null;
+
+            term.writeln('\x1b[1;31m[ERRO DE COMPILAÇÃO]\x1b[0m');
+            formatarMensagemErro(erro, mapeado).split("\n").forEach(linha => term.writeln(linha));
+
+            if (mapeado && mapeado.origem === "editor") {
+                marcarErroCompilacao(view, mapeado.linha, erro.coluna);
+            } else {
+                limparErroCompilacao(view);
+            }
+            return;
+        }
+
+        limparErroCompilacao(view);
+
+        await pyodideInstance.runPythonAsync(`
+with open("output/main.py", "r", encoding="utf-8") as f:
+    codigo_python_gerado = f.read()
+
+print("\\033[1;32m[EXECUTANDO]\\033[0m")
+print("")
+
+try:
+    exec(codigo_python_gerado, {"__name__": "__main__"})
+except SystemExit:
+    pass
         `);
         term.write('\r\n\x1b[1;32m[FIM DO PROGRAMA]\x1b[0m\r\n');
     } catch (err) {
