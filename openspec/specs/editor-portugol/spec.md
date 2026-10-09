@@ -37,10 +37,11 @@ Quando uma compilação falhar com um erro localizado no código do editor, o ed
 - **WHEN** a linha reportada é maior que o número de linhas do editor
 - **THEN** a última linha do editor é marcada e o Lab não lança erro
 
-### Requirement: Realce de sintaxe do core 1.2.0
+### Requirement: Realce de sintaxe
 O realce SHALL classificar os tokens assim, sem diferenciar maiúsculas de minúsculas nas palavras:
-- Palavra-chave: as palavras-chave existentes mais `mod`.
-- Tipo: exatamente `inteiro`, `real`, `float`, `string`, `cadeia`, `logico`, `lista`, `dicionario` e `filaPrioridade`. `fila`, `pilha` e `heap` MUST NOT ser realçados como tipo.
+- Palavra-chave: exatamente as palavras reservadas do core: `algoritmo`, `var`, `inicio`, `fim_algoritmo`, `usar`, `se`, `entao`, `então`, `senao`, `senão`, `fim_se`, `enquanto`, `faca`, `faça`, `fim_enquanto`, `para`, `de`, `ate`, `até`, `passo`, `fim_para`, `escreva`, `leia`, `retorne`, `funcao`, `fim_funcao`, `classe`, `metodo`, `novo`, `fim_classe`, `interrompa`, `continue`, `e`, `ou`, `nao`, `não` e `mod`. `função` e `fim_função` MUST NOT ser realçados como palavra-chave.
+- Tipo, em qualquer posição: `inteiro`, `real`, `float`, `string`, `cadeia`, `dicionario` e `filaPrioridade`. `fila`, `pilha` e `heap` MUST NOT ser realçados como tipo.
+- Tipo contextual: `lista` e `logico` SHALL ser realçados como tipo somente quando o token significativo anterior for `:` ou `novo`. Espaços, quebras de linha e comentários não contam como token significativo. Em qualquer outra posição, eles MUST ser realçados como nome de variável.
 - Operador: `<-`, `!=`, `<>`, `<=`, `>=` e `==`, cada um como um único token, além de `+ - * / % = < >`.
 - Número: inteiros e decimais com ponto (`3.14`).
 - String: entre aspas duplas, aceitando aspas escapadas (`\"`) e barra invertida escapada (`\\`).
@@ -70,12 +71,34 @@ O realce SHALL classificar os tokens assim, sem diferenciar maiúsculas de minú
 - **WHEN** o editor contém `area <- pi * r * r`
 - **THEN** `pi` é realçado como atom
 
+#### Scenario: lista como variável
+- **WHEN** o editor contém `lista <- [1, 2]`
+- **THEN** `lista` é realçado como nome de variável
+
+#### Scenario: lista como tipo
+- **WHEN** o editor contém `var l: lista` e `x <- novo lista()`
+- **THEN** `lista` é realçado como tipo nas duas linhas
+
+#### Scenario: logico como variável
+- **WHEN** o editor contém `se logico entao`
+- **THEN** `logico` é realçado como nome de variável
+
+#### Scenario: Contexto atravessa linhas, mas só pelo último token
+- **WHEN** uma linha termina em `var l:` e a linha seguinte começa com `lista`
+- **THEN** `lista` é realçado como tipo
+- **AND** quando a linha anterior é `var x: inteiro` e a linha seguinte começa com `lista <- [1]`, `lista` é realçado como nome de variável
+
+#### Scenario: Formas acentuadas não aceitas pelo core
+- **WHEN** o editor contém `função` ou `fim_função`
+- **THEN** essas palavras não são realçadas como palavra-chave
+
 ### Requirement: Snippets de autocomplete
 O autocomplete SHALL oferecer, além dos snippets existentes (`se`, `funcao`, `enquanto`, `classe`), os snippets abaixo:
 - `escreva`: `escreva(<cursor>)`
 - `leia`: `leia(<variavel>)`
 - `metodo`: `metodo <nome>(<parametros>)`, corpo indentado e `fim_funcao`
 - `para`: `para <variavel> de <inicio> ate <fim> faca`, corpo indentado e `fim_para`, sem `passo`
+- `var`: `var <nome>: <tipo> <- <valor>`, com o detalhe "variável local"
 
 #### Scenario: Snippet do para sem passo
 - **WHEN** o aluno aceita o snippet `para`
@@ -88,3 +111,7 @@ O autocomplete SHALL oferecer, além dos snippets existentes (`se`, `funcao`, `e
 #### Scenario: Snippets de entrada e saída
 - **WHEN** o aluno digita `esc` ou `lei` e abre o autocomplete
 - **THEN** são oferecidos, respectivamente, os snippets `escreva` e `leia`
+
+#### Scenario: Snippet de variável local
+- **WHEN** o aluno digita `va` e aceita o snippet `var`
+- **THEN** o texto inserido é `var nome: tipo <- valor`, com `nome`, `tipo` e `valor` como campos editáveis

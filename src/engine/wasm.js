@@ -3,7 +3,7 @@ import { extrairMensagemErro, mapearLinhaErro, formatarMensagemErro } from "./er
 import { marcarErroCompilacao, limparErroCompilacao } from "../editor/meupia-lang.js";
 
 let pyodide = null;
-let version = "1.2.0"
+let version = "1.3.0"
 
 const contarLinhas = (texto) => texto.split("\n").length;
 

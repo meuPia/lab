@@ -3,22 +3,45 @@ import { completeFromList, snippetCompletion } from "@codemirror/autocomplete";
 import { StateField, StateEffect } from "@codemirror/state";
 import { EditorView, Decoration } from "@codemirror/view";
 
+// Exatamente as palavras reservadas do meupia-core (o core não aceita "função"/"fim_função").
 const meuPiaKeywords = [
-    "algoritmo", "var", "inicio", "fim_algoritmo", "se", "entao", "então", "senao", "senão",
-    "fim_se", "enquanto", "faca", "faça", "fim_enquanto", "para", "de", "ate", "até", "retorne",
-    "passo", "fim_para", "escreva", "leia", "usar", "e", "ou", "nao", "não", "interrompa", "continue",
-    "classe", "metodo", "funcao", "função", "fim_funcao", "fim_função", "novo", "fim_classe", "mod"
+    "algoritmo", "var", "inicio", "fim_algoritmo", "usar", "se", "entao", "então", "senao", "senão",
+    "fim_se", "enquanto", "faca", "faça", "fim_enquanto", "para", "de", "ate", "até", "passo",
+    "fim_para", "escreva", "leia", "retorne", "funcao", "fim_funcao", "classe", "metodo", "novo",
+    "fim_classe", "interrompa", "continue", "e", "ou", "nao", "não", "mod"
 ];
 
 // Comparados em minúsculas: "filaprioridade" corresponde a filaPrioridade.
 const meuPiaTypes = [
-    "inteiro", "real", "float", "string", "cadeia", "logico",
-    "lista", "dicionario", "filaprioridade"
+    "inteiro", "real", "float", "string", "cadeia", "dicionario", "filaprioridade"
 ];
+
+// Só são tipo depois de ":" ou de "novo"; em qualquer outro lugar são nomes comuns.
+const meuPiaTiposContextuais = ["lista", "logico"];
 
 const meuPiaAtoms = ["verdadeiro", "falso", "pi"];
 
-export const meuPiaLanguage = StreamLanguage.define({
+/**
+ * Classifica uma palavra para o realce, dado o último token significativo antes dela.
+ */
+export function classificarPalavra(palavra, tokenAnterior) {
+    const word = palavra.toLowerCase();
+    if (meuPiaKeywords.includes(word)) return "keyword";
+    if (meuPiaAtoms.includes(word)) return "atom";
+    if (meuPiaTypes.includes(word)) return "typeName";
+
+    const anterior = tokenAnterior ? tokenAnterior.toLowerCase() : null;
+    if (meuPiaTiposContextuais.includes(word) && (anterior === ":" || anterior === "novo")) return "typeName";
+
+    return "variableName";
+}
+
+// O estado guarda o último token significativo (espaços e comentários não contam),
+// inclusive entre linhas.
+export const meuPiaTokenizer = {
+    startState() {
+        return { anterior: null };
+    },
     token(stream, state) {
         if (stream.eatSpace()) return null;
 
@@ -27,22 +50,38 @@ export const meuPiaLanguage = StreamLanguage.define({
             return "comment";
         }
 
-        if (stream.match(/^"(?:[^"\\]|\\.)*"/)) return "string";
-        if (stream.match(/^[0-9]+(?:\.[0-9]+)?/)) return "number";
-        if (stream.match(/^(?:<-|<>|<=|>=|==|!=|[+\-*/%=<>])/)) return "operator";
+        if (stream.match(/^"(?:[^"\\]|\\.)*"/)) {
+            state.anterior = "literal";
+            return "string";
+        }
+        if (stream.match(/^[0-9]+(?:\.[0-9]+)?/)) {
+            state.anterior = "literal";
+            return "number";
+        }
+
+        if (stream.eat(":")) {
+            state.anterior = ":";
+            return "punctuation";
+        }
+
+        if (stream.match(/^(?:<-|<>|<=|>=|==|!=|[+\-*/%=<>])/)) {
+            state.anterior = stream.current();
+            return "operator";
+        }
 
         if (stream.match(/^[\wÀ-ú]+/)) {
-            let word = stream.current().toLowerCase();
-            if (meuPiaKeywords.includes(word)) return "keyword";
-            if (meuPiaTypes.includes(word)) return "typeName";
-            if (meuPiaAtoms.includes(word)) return "atom";
-            return "variableName";
+            const estilo = classificarPalavra(stream.current(), state.anterior);
+            state.anterior = stream.current().toLowerCase();
+            return estilo;
         }
 
         stream.next();
+        state.anterior = stream.current();
         return null;
     }
-});
+};
+
+export const meuPiaLanguage = StreamLanguage.define(meuPiaTokenizer);
 
 const meuPiaSnippets = [
     snippetCompletion("se ${condicao} entao\n    ${}\nfim_se", {
@@ -83,6 +122,11 @@ const meuPiaSnippets = [
     snippetCompletion("leia(${variavel})", {
         label: "leia",
         detail: "entrada de dados",
+        type: "keyword"
+    }),
+    snippetCompletion("var ${nome}: ${tipo} <- ${valor}", {
+        label: "var",
+        detail: "variável local",
         type: "keyword"
     })
 ];
